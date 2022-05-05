@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import javax.validation.ConstraintViolationException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,13 +52,30 @@ class AnimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("Find returns anime list when successful")
+    @DisplayName("Find By Name returns anime list when successful")
     void findByName_ReturnsAnimeList_WhenSuccessful(){
         Anime animeToBeSaved = createAnime();
         Anime animeSaved = this.animeRepository.save(animeToBeSaved);
-        this.animeRepository.delete(animeSaved);
-        Optional<Anime> animeOptional = this.animeRepository.findById(animeSaved.getId());
-        Assertions.assertThat(animeOptional.isEmpty()).isTrue();
+        List<Anime> animes = this.animeRepository.findByName(animeSaved.getName());
+        Assertions.assertThat(animes)
+                .isNotEmpty()
+                .contains(animeSaved);
+    }
+
+    @Test
+    @DisplayName("Find By Name returns an empty list when no anime is found")
+    void findByName_ReturnsEmptyAnimeList_WhenAnimeIsNotFound(){
+        List<Anime> animes = this.animeRepository.findByName("crazy anime");
+        Assertions.assertThat(animes).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Save throws ConstraintViolationException when anime is empty")
+    void save_ThrowsConstraintViolationException_WhenAnimeIsEmpty(){
+        Anime anime = new Anime();
+        Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
+                .isThrownBy(() -> this.animeRepository.save(anime))
+                .withMessageContaining("The anime name cannot be empty");
     }
 
     public Anime createAnime(){

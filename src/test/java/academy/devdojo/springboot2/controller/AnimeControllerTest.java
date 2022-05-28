@@ -117,7 +117,7 @@ public class AnimeControllerTest {
     }
 
     @Test
-    @DisplayName("FindByName returns list of animes when successful")
+    @DisplayName("FindByName returns empty list of animes when anime name is not found")
     void findByName_returnsEmptyListOfAnimes_WhenAnimeNameIsNotFound() {
         BDDMockito.when(animeService.findByName(ArgumentMatchers.anyString()))
                 .thenReturn(Collections.emptyList());
